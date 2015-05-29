@@ -1,0 +1,12 @@
+<resources>
+    <string name="app_name">saii</string>
+
+
+    <string name="action_settings">Settings</string>
+    <string name="button">Submit</string>
+    <string name="mobnum">Enter your mobile number</string>
+    <string name="title_activity_nextpage">nextpage</string>
+    <string name="hello_world">Hello ROMEO…!!!</string>
+    <string name="hellllo">New Button</string>
+    <string name="hello">New Text</string>
+</resources>
