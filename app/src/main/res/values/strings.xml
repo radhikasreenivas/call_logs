@@ -9,4 +9,12 @@
     <string name="hello_world">Hello ROMEO…!!!</string>
     <string name="hellllo">New Button</string>
     <string name="hello">New Text</string>
+    <string name="missedcalls">New Button</string>
+    <string name="missed">MISSED</string>
+    <string name="incoming">New Button</string>
+    <string name="outgoing">New Button</string>
+    <string name="allcalls">ALL</string>
+    <string name="all">ALL</string>
+    <string name="missedcall">MISSED</string>
+    <string name="allcall">New Button</string>
 </resources>
