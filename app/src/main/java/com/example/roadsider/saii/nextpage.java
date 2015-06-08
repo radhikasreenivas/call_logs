@@ -6,7 +6,9 @@ import android.app.Activity;
 
 import android.content.ContentResolver;
 import android.content.ContentValues;
+import android.content.Context;
 import android.content.DialogInterface;
+import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
@@ -20,34 +22,70 @@ import android.widget.Toast;
 import java.util.Date;
 public class nextpage extends Activity {
     TextView callDetails;
+   // String ssp=null;
     ImageButton missed, outgng, incmng,all;
     databasehelper dbhelper;
     public Cursor mycursor;
     public SQLiteDatabase db;
+   // public String i;
+   // public String channel;
     public StringBuilder sbb = new StringBuilder();
     MainActivity m=new MainActivity();
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_nextpage);
+
+        //shared prefs
+
         callDetails = (TextView) findViewById(R.id.callog);
         all=(ImageButton) findViewById(R.id.imageButton);
         outgng = (ImageButton) findViewById(R.id.imageButton3);
         incmng = (ImageButton) findViewById(R.id.imageButton2);
         missed = (ImageButton) findViewById(R.id.imageButton4);
-        addLog();
+       // addLog();
+       // getlog();
+       // shared();
         mycursor= getlog();
         incode(mycursor);
+       // Toast.makeText(getBaseContext(),channel,Toast.LENGTH_LONG).show();
     }
 
+    public void incode(Cursor cursor)
+    {
+        StringBuilder sb=new StringBuilder();
+        String idno=null;
+        String type=null;
+        String phn=null;
+        String dur=null;
+        String dates=null;
+        if (cursor.moveToFirst()) {
+            do {
+                 idno = cursor.getString(0);
+                type = cursor.getString(1);
+                phn = cursor.getString(2);
+                dur = cursor.getString(3);
+                dates = cursor.getString(4);
+                sb.append(idno).append("\n");
+                sb.append(type).append("\n");
+                sb.append("Phone number : ").append(phn).append("\n");
+                sb.append("call duration : ").append(dur).append("\n").append("call date : ").append(dates).append("\n").append("\n").append("\n").append(System.getProperty("line.separator"));
+
+            } while (cursor.moveToNext());
+        }
+       // shared();
+       // Toast.makeText(getBaseContext(),"sp"+channel ,Toast.LENGTH_LONG).show();
+        callDetails.setText(sb.toString());
+        cursor.close();
+    }
     public void help(View view)
     {
         ImageButton clicked=(ImageButton) view;
 
         switch (clicked.getId()){
             case R.id.imageButton:
-                 mycursor= getlog();
-                incode(mycursor);
+                mycursor=getlog();
+                 incode(mycursor);
                 break;
             case R.id.imageButton2:
                 mycursor = incmng();
@@ -64,10 +102,12 @@ public class nextpage extends Activity {
 
         }
     }
+
+
     public Cursor incmng() {
         dbhelper = new databasehelper(this);
         db = dbhelper.getReadableDatabase();
-        String selectQuery = "SELECT * FROM calllogs WHERE TYPE=\"INCOMING CALLS\"";
+        String selectQuery = "SELECT * FROM call_logs WHERE TYPE=\"INCOMING CALLS\" ORDER BY IDNO DESC";
         Cursor cursor = db.rawQuery(selectQuery, null);
         return cursor;
 
@@ -76,7 +116,7 @@ public class nextpage extends Activity {
     public Cursor missed() {
         dbhelper = new databasehelper(this);
         db = dbhelper.getReadableDatabase();
-        String selectQuery = "SELECT * FROM calllogs WHERE TYPE=\"MISSED CALLS\"";
+        String selectQuery = "SELECT * FROM call_logs WHERE TYPE=\"MISSED CALLS\" ORDER BY IDNO DESC";
         Cursor cursor = db.rawQuery(selectQuery, null);
         return cursor;
     }
@@ -85,97 +125,22 @@ public class nextpage extends Activity {
     {
         dbhelper = new databasehelper(this);
         db = dbhelper.getReadableDatabase();
-        String selectQuery = "SELECT * FROM calllogs WHERE TYPE=\"OUTGOING CALLS\"";
+        String selectQuery = "SELECT * FROM call_logs WHERE TYPE=\"OUTGOING CALLS\" ORDER BY IDNO DESC";
         Cursor cursor = db.rawQuery(selectQuery, null);
         return cursor;
     }
 
 
-
-
-    public void addLog() {
-
-        dbhelper = new databasehelper(this);
-        Cursor cursor;
-        ContentResolver cr = getContentResolver();
-        cursor = cr.query(
-                android.provider.CallLog.Calls.CONTENT_URI, null, null, null,
-                android.provider.CallLog.Calls.DATE + " DESC ");
-        db = dbhelper.getWritableDatabase();
-
-        db.delete(databasehelper.TABLE_NAME,null,null);
-        int idno=0;
-        int calltype = cursor.getColumnIndex(android.provider.CallLog.Calls.TYPE);
-        int numberColumnId = cursor.getColumnIndex(android.provider.CallLog.Calls.NUMBER);
-        int durationId = cursor.getColumnIndex(android.provider.CallLog.Calls.DURATION);
-        int dateId = cursor.getColumnIndex(android.provider.CallLog.Calls.DATE);
-
-        if (cursor.moveToFirst()) {
-            do {
-                String cType = cursor.getString(calltype);
-                String callogstr = "";
-                switch (Integer.parseInt(cType)) {
-                    case CallLog.Calls.OUTGOING_TYPE:
-                        callogstr = "OUTGOING CALLS";
-                        break;
-                    case CallLog.Calls.INCOMING_TYPE:
-                        callogstr = "INCOMING CALLS";
-                        break;
-
-                    case CallLog.Calls.MISSED_TYPE:
-                        callogstr = "MISSED CALLS";
-                        break;
-                }
-                String contactNumber = cursor.getString(numberColumnId);
-                String duration = cursor.getString(durationId);
-                String ddd=cursor.getString(dateId);
-                Date dd = new Date(Long.valueOf(ddd));
-                ContentValues values = new ContentValues();
-                values.put(databasehelper.ID,idno);
-                values.put(databasehelper.pnam, callogstr);
-                values.put(databasehelper.phno, contactNumber);
-                values.put(databasehelper.pdur, duration);
-                values.put(databasehelper.pdate, String.valueOf(dd));
-
-                db.insert(databasehelper.TABLE_NAME, null, values);
-                idno++;
-            } while (cursor.moveToNext());
-        }
-        cursor.close();
-    }
 
     public Cursor getlog() {
         dbhelper = new databasehelper(this);
         db = dbhelper.getReadableDatabase();
-        String selectQuery = "SELECT * FROM calllogs";
+        String selectQuery = "SELECT * FROM call_logs ORDER BY IDNO DESC";
         Cursor cursor = db.rawQuery(selectQuery, null);
         return cursor;
     }
 
-    public void incode(Cursor cursor)
-    {
-        StringBuilder sb=new StringBuilder();
-        int idno;
-        String type=null;
-        String phn=null;
-        String dur=null;
-        String dates=null;
-        if (cursor.moveToFirst()) {
-            do {
-                //  idno = cursor.getInt(0);
-                type = cursor.getString(1);
-                phn = cursor.getString(2);
-                dur = cursor.getString(3);
-                dates = cursor.getString(4);
-                sb.append(type).append("\n");
-                sb.append("Phone number : ").append(phn).append("\n");
-                sb.append("call duration : ").append(dur).append("\n").append("call date : ").append(dates).append("\n").append("\n").append("\n").append(System.getProperty("line.separator"));
 
-            } while (cursor.moveToNext());
-        }
-        callDetails.setText(sb.toString());
-        cursor.close();
-    }
 
     }
 
